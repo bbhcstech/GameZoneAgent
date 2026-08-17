@@ -1,5 +1,3 @@
-from urllib import response
-
 import requests
 from config import API_BASE_URL
 from utils.logger import logger
@@ -20,8 +18,6 @@ class ApiService:
         try:
             url = f"{API_BASE_URL}/agent/heartbeat"
             response = requests.post(url, json=data)
-            print(response.status_code)
-            print(response.text)
             response.raise_for_status()
             return response.json()
         except requests.RequestException as e:
@@ -55,8 +51,6 @@ class ApiService:
                     "result": result
                 }
             )
-            print(response.status_code)
-            print(response.text)
             response.raise_for_status()
             return response.json()
         except requests.RequestException as e:
@@ -79,21 +73,4 @@ class ApiService:
 
         except requests.RequestException as e:
             logger.error(f"Session expiry failed: {e}")
-            return None
-
-    def upload_qr(self, qr_path):
-        try:
-            url = f"{API_BASE_URL}/agent/qr/upload"
-
-            with open(qr_path, "rb") as qr_file:
-                response = requests.post(
-                    url,
-                    files={"qr": qr_file}
-                )
-
-            response.raise_for_status()
-            return response.json()
-
-        except (requests.RequestException, OSError) as e:
-            logger.error(f"QR upload failed: {e}")
             return None

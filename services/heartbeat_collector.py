@@ -1,6 +1,5 @@
 import psutil
 import time
-import platform
 import socket
 from utils.logger import logger
 
@@ -20,7 +19,7 @@ class HeartbeatCollector:
             ram_percent = mem.percent
             
             # Disk (main drive)
-            disk = psutil.disk_usage('/')
+            disk = psutil.disk_usage('C:\\')
             disk_total = round(disk.total / (1024**3), 2)
             disk_used = round(disk.used / (1024**3), 2)
             disk_percent = disk.percent
@@ -45,7 +44,7 @@ class HeartbeatCollector:
                 buff = ctypes.create_unicode_buffer(length + 1)
                 user32.GetWindowTextW(hwnd, buff, length + 1)
                 active_window = buff.value or 'Unknown'
-            except:
+            except Exception:
                 pass
             
             # Check if game is running
@@ -67,9 +66,9 @@ class HeartbeatCollector:
                                 break
                         if game_running:
                             break
-                    except:
+                    except (psutil.NoSuchProcess, psutil.AccessDenied):
                         continue
-            except:
+            except Exception:
                 pass
             
             # Determine status

@@ -43,7 +43,7 @@ class WebSocketService:
         logger.info(error)
 
     def on_close(self, ws, close_status_code, close_msg):
-        logger.info("websocket disconected")
+        logger.info("websocket disconnected")
 
     def on_open(self, ws):
         logger.info("websocket connected")

@@ -1,19 +1,13 @@
 from commands.game_launcher import GameLauncher
 from commands.lock_pc import LockPC
-from commands.shutdown_pc import ShutdownPC
-from commands.restart_pc import RestartPC
-from commands.logout_user import LogoutUser
 from commands.kill_process import KillProcess
 from commands.open_url import OpenURL
 from commands.execute_cmd import ExecuteCMD
-from commands.execute_powershell import ExecutePowerShell
-from commands.delete_file import DeleteFile
 from commands.get_processes import GetProcesses
 from commands.get_active_games import GetActiveGames
 from commands.get_system_info import GetSystemInfo
 from commands.get_idle_status import GetIdleStatus
 from commands.send_popup import SendPopup
-from commands.show_qr import ShowQR
 import threading
 from services.api_service import ApiService
 from services.timer_service import TimerService
@@ -22,12 +16,9 @@ from utils.logger import logger
 
 
 class CommandService:
-
     def __init__(self):
         self.timer = TimerService()
-
     def execute(self, command_id, command, payload=None):
-
         if command == "launch_game":
             result = GameLauncher().launch(payload)
             ApiService().command_ack(
@@ -38,18 +29,6 @@ class CommandService:
 
         elif command == "lock_pc":
             LockPC().execute()
-            ApiService().command_ack(command_id, "success")
-
-        elif command == "shutdown_pc":
-            ShutdownPC().execute()
-            ApiService().command_ack(command_id, "success")
-
-        elif command == "restart_pc":
-            RestartPC().execute()
-            ApiService().command_ack(command_id, "success")
-
-        elif command == "logout_user":
-            LogoutUser().execute()
             ApiService().command_ack(command_id, "success")
 
         elif command == "kill_process":
@@ -70,22 +49,6 @@ class CommandService:
 
         elif command == "execute_cmd":
             result = ExecuteCMD().execute(payload)
-            ApiService().command_ack(
-                command_id,
-                "success" if result["success"] else "failure"
-            )
-            ApiService().command_result(command_id, result)
-
-        elif command == "execute_powershell":
-            result = ExecutePowerShell().execute(payload)
-            ApiService().command_ack(
-                command_id,
-                "success" if result["success"] else "failure"
-            )
-            ApiService().command_result(command_id, result)
-
-        elif command == "delete_file":
-            result = DeleteFile().execute(payload)
             ApiService().command_ack(
                 command_id,
                 "success" if result["success"] else "failure"
@@ -134,45 +97,27 @@ class CommandService:
 
         elif command == "alert":
             result = SendPopup().execute(payload)
-
             ApiService().command_ack(
                 command_id,
                 "success" if result["success"] else "failure"
             )
-
-            ApiService().command_result(command_id, result)
-
-        elif command == "show_qr":  
-            result = ShowQR().execute(payload)
-
-            ApiService().command_ack(
-                command_id,
-                "success" if result["success"] else "failure"
-            )
-
             ApiService().command_result(command_id, result)
 
         elif command == "start":
             print("TIMER ENDS AT:", payload["ends_at"])
-            threading.Thread(
-                target=self.timer.start,
+            threading.Thread(target=self.timer.start,
                 args=(
                     payload["session_id"],
                     payload["ends_at"]
                 ),
                 daemon=True
             ).start()
-
             print(f"✅ Session started until {payload['ends_at']}")
             ApiService().command_ack(command_id, "success")
 
         elif command == "extend":
             self.timer.extend(payload["ends_at"])
-
-            print(
-                f"✅ Session extended until {payload['ends_at']}"
-            )
-
+            print(f"✅ Session extended until {payload['ends_at']}")
             ApiService().command_ack(command_id, "success")
 
         elif command == "test":
