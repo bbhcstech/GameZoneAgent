@@ -1,4 +1,6 @@
 import ctypes
+import threading
+import time
 
 class SendPopup:
     def execute(self, payload):
@@ -6,13 +8,11 @@ class SendPopup:
             message = payload.get('message', '')
             title = payload.get('title', 'Game Zone')
             message_type = payload.get('type', 'info')
-            recharge_url = payload.get('recharge_url')
-            print("RECHARGE URL:", recharge_url)
 
             if not message:
                 return {'success': False, 'error': 'Message is required'}
 
-            icon_map = {
+            icon_map = {    
                 'info': 0x40,
                 'warning': 0x30,
                 'error': 0x10
@@ -20,16 +20,21 @@ class SendPopup:
 
             icon = icon_map.get(message_type, 0x40)
 
+            flags = (
+                icon |
+                0x00010000 |  # MB_SETFOREGROUND
+                0x00040000 |  # MB_SYSTEMMODAL
+                0x00000004    # Yes/No
+            )
+
             result = ctypes.windll.user32.MessageBoxW(
                 0,
                 message,
                 title,
-                icon | 0x00010000 | 0x00040000 | 0x00000004
+                flags
             )
 
             choice = 'yes' if result == 6 else 'no'
-
-            print("POPUP RESULT:", {"choice": choice,"session_id": payload.get("session_id")})
 
             return {
                 'success': True,
