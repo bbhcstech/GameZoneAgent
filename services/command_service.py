@@ -88,23 +88,24 @@ class CommandService:
             ApiService().command_result(command_id, result)
 
         elif command == "send_popup":
-            result = SendPopup().execute(payload)
-            ApiService().command_ack(
-                command_id,
-                "success" if result["success"] else "failure"
-            )
-            ApiService().command_result(command_id, result)
+            def show_popup():
+                result = SendPopup().execute(payload)
+                ApiService().command_ack(command_id, "success" if result.get("success") else "failure")
+                ApiService().command_result(command_id, result)
+            threading.Thread(target=show_popup, daemon=True).start()
 
         elif command == "alert":
-            result = SendPopup().execute(payload)
-            ApiService().command_ack(
-                command_id,
-                "success" if result["success"] else "failure"
-            )
-            ApiService().command_result(command_id, result)
+            def show_alert():
+                result = SendPopup().execute(payload)
+                ApiService().command_ack(command_id, "success" if result.get("success") else "failure")
+                ApiService().command_result(command_id, result)
+            threading.Thread(target=show_alert, daemon=True).start()
 
         elif command == "start":
-            print("TIMER ENDS AT:", payload["ends_at"])
+            from datetime import datetime
+            ends_dt = datetime.fromisoformat(payload["ends_at"].replace("Z", "+00:00")).astimezone()
+            local_time_str = ends_dt.strftime("%I:%M:%S %p")
+            print(f"✅ Session started. Ends at: {local_time_str} ({payload.get('minutes', 0):.1f} mins)")
             threading.Thread(target=self.timer.start,
                 args=(
                     payload["session_id"],
@@ -112,12 +113,14 @@ class CommandService:
                 ),
                 daemon=True
             ).start()
-            print(f"✅ Session started until {payload['ends_at']}")
             ApiService().command_ack(command_id, "success")
 
         elif command == "extend":
+            from datetime import datetime
+            ends_dt = datetime.fromisoformat(payload["ends_at"].replace("Z", "+00:00")).astimezone()
+            local_time_str = ends_dt.strftime("%I:%M:%S %p")
             self.timer.extend(payload["ends_at"])
-            print(f"✅ Session extended until {payload['ends_at']}")
+            print(f"✅ Session extended until: {local_time_str}")
             ApiService().command_ack(command_id, "success")
 
         elif command == "test":
