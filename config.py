@@ -1,6 +1,6 @@
 
 SERVER_IP = "15.207.230.199"
-AGENT_KEY = "4UjPPhRMTAXvR85CnpV3JdB6"
+AGENT_KEY = "1iPg91Owqug9ETKgqV7lEApg"
 
 API_BASE_URL = f"http://{SERVER_IP}/api"
 WEBSOCKET_URL = f"ws://{SERVER_IP}:8080/app/gamezonekey"
